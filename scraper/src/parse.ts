@@ -75,6 +75,9 @@ function parseCount(text: string): number | null {
   return t && Number.isFinite(n) ? n : null;
 }
 
+/** The value if it's within [lo, hi], else null (agents' typos: 41 bathrooms). */
+const inRange = (n: number | null, lo: number, hi: number) => (n != null && n >= lo && n <= hi ? n : null);
+
 export function kindOf(word: string): Kind {
   return KINDS[squash(word).toLowerCase()] ?? 'other';
 }
@@ -151,9 +154,9 @@ export function parsePage(html: string, city: string, offer: Offer): ParsedPage 
       area,
       building,
       title,
-      bedrooms: beds ?? titleBeds,
-      bathrooms: facts.bathtub != null ? parseCount(facts.bathtub) : null,
-      floor_sqm: sqm,
+      bedrooms: inRange(beds ?? titleBeds, 0, 20),
+      bathrooms: inRange(facts.bathtub != null ? parseCount(facts.bathtub) : null, 0, 20),
+      floor_sqm: inRange(sqm, 1, 99_999),
       price_php: price,
       furnishing: furnishingOf(`${title} ${description}`),
     });

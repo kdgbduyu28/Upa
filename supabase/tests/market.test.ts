@@ -45,6 +45,14 @@ describe('ingest', () => {
     expect(runRow.rows[0]).toMatchObject({ seen: 4, inserted: 2, pages: 2 });
   });
 
+  it('keeps the rent and sale sides of one "for Sale or Rent" listing apart', async () => {
+    await ingest([row(1, { price_php: 45000 })]);
+    const r = await ingest([row(1, { offer: 'sale', price_php: 9_000_000 })]);
+    expect(r.inserted).toBe(1);
+    const n = await db.query(`select offer, price_php from market_listings order by offer`);
+    expect(n.rows).toEqual([{ offer: 'rent', price_php: '45000' }, { offer: 'sale', price_php: '9000000' }]);
+  });
+
   it('drops rows with unknown cities or absurd prices', async () => {
     const r = await ingest([row(1, { city: 'atlantis' }), row(2, { price_php: 50 }), row(3)]);
     expect(r.inserted).toBe(1);

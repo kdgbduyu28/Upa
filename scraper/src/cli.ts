@@ -2,6 +2,7 @@
 // npm run scrape                          → full run into DATABASE_URL
 // npm run scrape -- --dry-run             → parse and print, write nothing
 // npm run scrape -- --city makati --pages 1 --dry-run
+// npm run scrape -- --offer sale        → only the sale searches
 import postgres from 'postgres';
 import { scrape } from './run';
 
@@ -24,6 +25,7 @@ async function main() {
     const r = await scrape({
       sql,
       cities: value('city')?.split(','),
+      offer: value('offer') === 'sale' || value('offer') === 'rent' ? (value('offer') as 'rent' | 'sale') : undefined,
       politeness: {
         ...(value('pages') ? { maxPages: Number(value('pages')) } : {}),
         ...(value('delay') ? { delayMs: Math.max(2000, Number(value('delay'))) } : {}),

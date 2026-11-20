@@ -214,7 +214,8 @@ const bookings = [];
 const reviews = [];
 let bookingId = 0;
 for (const s of stays) {
-  const guestsFor = () => guestIds.filter((g) => g !== s.host);
+  // The demo guest gets only its three planned trips (added below), so its Trips page stays readable.
+  const guestsFor = () => guestIds.filter((g) => g !== s.host && g !== DEMO_GUEST.id);
   // Past stays (completed), most with reviews.
   let cursor = -int(120, 150);
   const pastCount = int(1, 4);

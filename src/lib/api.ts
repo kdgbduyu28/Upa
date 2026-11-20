@@ -231,7 +231,7 @@ export function searchStays(p: SearchParams) {
 const STAY_SELECT = `id, host_id, title, description, kind, city_id, area, bedrooms, bathrooms, max_guests, floor_sqm,
   nightly_php, monthly_php, cleaning_fee_php, min_nights, instant_book, amenities, photos, art_seed, published,
   rating_avg, rating_count, location,
-  city:cities(slug, name), host:profiles(id, display_name, bio, avatar_url, created_at)`;
+  city:cities(slug, name), host:profiles!stays_host_id_fkey(id, display_name, bio, avatar_url, created_at)`;
 
 function toStay(r: Record<string, unknown>): Stay {
   const [lng, lat] = pointOf(r.location);
@@ -254,7 +254,7 @@ export async function myStays(hostId: string): Promise<Stay[]> {
 export async function stayReviews(stayId: number, limit = 20): Promise<Review[]> {
   const { data, error } = await db()
     .from('reviews')
-    .select('id, rating, body, created_at, author:profiles(display_name)')
+    .select('id, rating, body, created_at, author:profiles!reviews_author_id_fkey(display_name)')
     .eq('stay_id', stayId)
     .order('created_at', { ascending: false })
     .limit(limit);
@@ -283,8 +283,8 @@ export const setBookingStatus = (id: number, status: BookingStatus) =>
 export const blockDates = (stay: number, from: string, to: string, note = '') =>
   rpc<Booking>('block_dates', { p_stay: stay, p_from: from, p_to: to, p_note: note });
 
-const BOOKING_SELECT = `*, stay:stays(id, title, kind, art_seed, photos, city:cities(name)),
-  guest:profiles!bookings_guest_id_fkey(display_name), review:reviews(id, rating)`;
+const BOOKING_SELECT = `*, stay:stays!bookings_stay_id_fkey(id, title, kind, art_seed, photos, city:cities(name)),
+  guest:profiles!bookings_guest_id_fkey(display_name), review:reviews!reviews_booking_id_fkey(id, rating)`;
 
 /** Bookings the signed-in user can see: their trips, plus bookings on stays they host. */
 export async function myBookings(): Promise<BookingWithStay[]> {

@@ -15,7 +15,8 @@
     "release": "./scripts/release.sh",
     "seed:sql": "node scripts/build-seed.mjs",
     "scrape": "tsx scraper/src/cli.ts",
-    "test:sql": "vitest run supabase"
+    "test:sql": "vitest run supabase",
+    "load:reference": "node scripts/load-reference.mjs"
   },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.18",

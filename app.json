@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Upa",
+    "slug": "upa",
+    "scheme": "upa",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ph.upa.app"
+    },
+    "android": {
+      "package": "ph.upa.app",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "name": "Upa",
+      "shortName": "Upa",
+      "themeColor": "#A63F24",
+      "backgroundColor": "#F7F4F0"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-asset",
+      "expo-status-bar",
+      "expo-splash-screen",
+      "expo-web-browser",
+      "expo-image"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "description": "What rent really costs in the Philippines, and stays you can book. Built on PostgreSQL."
+  }
+}

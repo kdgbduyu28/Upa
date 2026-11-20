@@ -1,0 +1,45 @@
+name: Scrape market data
+
+# Once a day, 06:00 Manila. One request every 3 s, at most 400 requests, so a
+# run takes about 15 minutes. Writes straight into the Supabase database.
+on:
+  schedule:
+    - cron: "0 22 * * *"
+  workflow_dispatch:
+    inputs:
+      city:
+        description: "Only these city slugs (comma-separated); empty = all"
+        required: false
+      pages:
+        description: "Pages per search (default 4)"
+        required: false
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Parser tests
+        run: npx vitest run scraper
+      - name: Scrape
+        if: env.DATABASE_URL != ''
+        run: |
+          ARGS=()
+          [ -n "${{ inputs.city }}" ] && ARGS+=(--city "${{ inputs.city }}")
+          [ -n "${{ inputs.pages }}" ] && ARGS+=(--pages "${{ inputs.pages }}")
+          npm run scrape -- "${ARGS[@]}"
+      - name: No database yet
+        if: env.DATABASE_URL == ''
+        run: echo "::notice::DATABASE_URL secret is not set; skipping the scrape."

@@ -17,6 +17,8 @@ export default function Account() {
   }, [ready, session]);
   useEffect(() => {
     if (profile) {
+      // Copy the loaded profile into the form once it arrives.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(profile.display_name);
       setBio(profile.bio ?? '');
     }

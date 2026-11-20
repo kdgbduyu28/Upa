@@ -164,6 +164,13 @@ describe('search', () => {
     expect(await hit('baguoi garden')).toEqual(['Garden house in Baguio']);
   });
 
+  it('matches a misspelt city plus an amenity', async () => {
+    await addStay(db, HOST, { title: 'High-floor 1BR with a view', amenities: ['wifi', 'pool'] });
+    await addStay(db, HOST, { title: 'Quiet 1BR near the park', amenities: ['wifi', 'backup-power'] });
+    const r = await asUser<{ title: string }>(db, null, `select title from search_stays(p_q => 'makatii pool')`);
+    expect(r.map((x) => x.title)).toEqual(['High-floor 1BR with a view']);
+  });
+
   it('filters by distance and sorts nearest first', async () => {
     const near = await addStay(db, HOST, { lat: 14.5550, lng: 121.0250 });
     const mid = await addStay(db, HOST, { lat: 14.5650, lng: 121.0300 });

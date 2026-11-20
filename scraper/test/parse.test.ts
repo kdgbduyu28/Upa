@@ -29,7 +29,6 @@ describe('parsePage on saved Dot Property pages', () => {
   it('reads sale pages and skips developer project cards', () => {
     const p = parsePage(fixture('condos-for-sale-makati'), 'makati', 'sale');
     expect(p.listings.length).toBeGreaterThan(15);
-    expect(p.skipped.some((s) => /project|range|price/.test(s.reason))).toBe(true);
     for (const l of p.listings) expect(l.price_php).toBeGreaterThan(500_000);
   });
 
@@ -42,6 +41,22 @@ describe('parsePage on saved Dot Property pages', () => {
   it('keeps only the side of "for Sale or Rent" cards that matches the page', () => {
     const rent = parsePage(fixture('condos-for-rent-pasig'), 'pasig', 'rent');
     for (const l of rent.listings) expect(l.price_php).toBeLessThan(5_000_000);
+  });
+
+  it('drops a sale price typed in as monthly rent', () => {
+    const rent = parsePage(fixture('condos-for-rent-pasig'), 'pasig', 'rent');
+    expect(rent.skipped).toContainEqual({ id: '019fd7e4-e8c7-71ba-9d51-9ae6c7d3ad18', reason: 'implausible price' });
+  });
+
+  it('skips developer project cards (price "From", size ranges)', () => {
+    const html = `<article class="listing-snippet" data-uuid="p1">
+      <a href="https://www.dotproperty.com.ph/ads/the-linear_1"></a>
+      <div class="text-2xl font-semibold" title="The Linear">The Linear</div>
+      <div><div class="text-secondary-base font-bold">From ₱ 4,252,740</div></div>
+      <ul><li><img src="//x/resize-1.svg">22-27 m2</li></ul></article>`;
+    const p = parsePage(html, 'makati', 'sale');
+    expect(p.listings).toHaveLength(0);
+    expect(p.skipped[0].reason).toMatch(/project/);
   });
 });
 

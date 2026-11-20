@@ -15,10 +15,17 @@ type Row = Partial<{
   bedrooms: number; floor_sqm: number; price_php: number;
 }>;
 
+// Distinct building names, so test listings aren't mistaken for reposts of one unit.
+const BUILDINGS = ['Acacia', 'Bougainvillea', 'Camia', 'Dama de Noche', 'Ilang-Ilang', 'Jasmin', 'Kalachuchi', 'Lotus',
+  'Mayumi', 'Narra', 'Orchid', 'Pandan', 'Rosal', 'Sampaguita', 'Tindalo', 'Waling-Waling', 'Yakal', 'Zinnia',
+  'Agoho', 'Banaba', 'Dao', 'Guijo', 'Lauan', 'Molave', 'Talisay', 'Apitong', 'Kamagong', 'Mangkono', 'Bitaog',
+  'Malabayabas', 'Supa', 'Tanguile', 'Almaciga', 'Bagtikan', 'Calantas'];
+
 function row(i: number, o: Row = {}) {
+  const b = `${BUILDINGS[i % BUILDINGS.length]} Residences`;
   return {
     source_id: `id-${i}`, url: `https://www.dotproperty.com.ph/ads/x_${i}`, offer: 'rent', kind: 'condo',
-    city: 'makati', area: 'Salcedo Village', building: `Tower ${i}`, title: `1 Bedroom Condo for rent in Tower ${i}`,
+    city: 'makati', area: 'Salcedo Village', building: b, title: `1 Bedroom Condo for rent in ${b}`,
     bedrooms: 1, bathrooms: 1, floor_sqm: 40, price_php: 30000 + i * 1000, furnishing: 'furnished', ...o,
   };
 }
@@ -110,7 +117,7 @@ describe('stats', () => {
   });
 
   it('marks listings unseen for 10 days inactive', async () => {
-    await db.query(`update market_listings set last_seen = now() - interval '11 days' where source_id = 'id-1'`);
+    await db.query(`update market_listings set first_seen = now() - interval '20 days', last_seen = now() - interval '11 days' where source_id = 'id-1'`);
     await db.query(`select finish_scrape_run($1, 'ok')`, [run]);
     const r = await db.query<{ active: boolean }>(`select active from market_listings where source_id = 'id-1'`);
     expect(r.rows[0].active).toBe(false);

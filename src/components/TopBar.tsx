@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Link, router, usePathname } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,23 +33,19 @@ export function TopBar() {
   return (
     <View style={[s.bar, { paddingTop: insets.top }]}>
       <Row style={s.inner} justify="space-between">
-        <Link href="/" asChild>
-          <Pressable accessibilityRole="link" accessibilityLabel="Upa home">
-            <Row gap={8}>
-              <View style={s.logo}><Ionicons name="home" size={16} color={C.onColor} /></View>
-              <T v="h2" style={{ letterSpacing: -0.5 }}>upa</T>
-            </Row>
-          </Pressable>
-        </Link>
+        <Pressable onPress={() => router.navigate('/')} accessibilityLabel="Upa home">
+          <Row gap={8}>
+            <View style={s.logo}><Ionicons name="home" size={16} color={C.onColor} /></View>
+            <T v="h2" style={{ letterSpacing: -0.5 }}>upa</T>
+          </Row>
+        </Pressable>
 
         {desktop ? (
           <Row gap={4}>
             {items.map((i) => (
-              <Link key={i.href} href={i.href as never} asChild>
-                <Pressable style={[s.link, active(i.href) && s.linkOn]} accessibilityRole="link">
-                  <T v="small" style={{ fontWeight: active(i.href) ? '700' : '500' }}>{i.label}</T>
-                </Pressable>
-              </Link>
+              <Pressable key={i.href} onPress={() => router.navigate(i.href as never)} style={[s.link, active(i.href) && s.linkOn]}>
+                <T v="small" style={{ fontWeight: active(i.href) ? '700' : '500' }}>{i.label}</T>
+              </Pressable>
             ))}
           </Row>
         ) : null}

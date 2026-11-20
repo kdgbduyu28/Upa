@@ -19,7 +19,7 @@ export default function About() {
           <T>
             Once a day a small program reads the first four pages of each search on Dot Property (condos, houses, apartments
             and townhouses, for rent and for sale, in 15 cities). It makes one request every three seconds, identifies
-            itself, follows the site's robots.txt and stops the moment the site refuses it.
+            itself, follows the site’s robots.txt and stops the moment the site refuses it.
           </T>
           <T>
             Only the facts needed for statistics are kept: type, city, area, bedrooms, bathrooms, floor area and asking price.
@@ -34,7 +34,7 @@ export default function About() {
 
       <Section title="Short stays">
         <Card style={{ gap: 8 }}>
-          <T>Nightly rates, occupancy and listing counts are copied by hand each month from AirDNA's free market pages.</T>
+          <T>Nightly rates, occupancy and listing counts are copied by hand each month from AirDNA’s free market pages.</T>
           <Row><Button small kind="secondary" icon="open-outline" title="AirDNA Philippines" onPress={link('https://www.airdna.co/vacation-rental-data/app/ph')} /></Row>
         </Card>
       </Section>

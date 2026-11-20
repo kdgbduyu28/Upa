@@ -156,6 +156,9 @@ returns table (
 )
 language sql stable
 set search_path = public, extensions
+-- Measured: one-letter typos ("baguoi", "boracy", "tagaytya") score 0.57–0.75,
+-- while unrelated short words ("pool" vs "power") score 0.40. Default is 0.6.
+set pg_trgm.word_similarity_threshold = 0.5
 as $$
   with params as (
     select
@@ -182,9 +185,14 @@ as $$
     cross join params p
     where s.published
       and (p_city is null or c.slug = p_city)
+      -- Full-text match, or every query word close to some word in the title,
+      -- area, city, kind or amenities ("baguoi garden" finds "Garden house in Baguio").
       and (p.fq is null
            or s.search @@ p.tsq
-           or p.fq <% fold(s.title || ' ' || s.area || ' ' || c.name))
+           or not exists (
+                select 1 from regexp_split_to_table(p.fq, '\s+') w
+                where length(w) > 1
+                  and not (w <% fold(s.title || ' ' || s.area || ' ' || c.name || ' ' || s.kind || ' ' || s.amenities::text))))
       and (p.pin is null or ST_DWithin(s.location, p.pin, p_radius_km * 1000))
       and (p_west is null
            or s.location && ST_MakeEnvelope(p_west, p_south, p_east, p_north, 4326)::geography)

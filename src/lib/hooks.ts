@@ -16,6 +16,8 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): Async<T> {
 
   useEffect(() => {
     const mine = ++seq.current;
+    // Marking the new request as loading is exactly what this effect is for.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     fn().then(
       (d) => {

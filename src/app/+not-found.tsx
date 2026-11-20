@@ -7,7 +7,7 @@ export default function NotFound() {
     <Page max={560}>
       <Stack.Screen options={{ title: 'Not found · Upa' }} />
       <T v="h1">Nothing here</T>
-      <T color={C.muted} style={{ marginVertical: 8 }}>That page doesn't exist.</T>
+      <T color={C.muted} style={{ marginVertical: 8 }}>That page doesn’t exist.</T>
       <Button title="Go home" onPress={() => router.replace('/')} />
     </Page>
   );

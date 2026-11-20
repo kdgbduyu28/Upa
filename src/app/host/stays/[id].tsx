@@ -50,6 +50,8 @@ export default function StayEditor() {
   useEffect(() => {
     const s = existing.data;
     if (!s) return;
+    // One-time copy of the loaded stay into the editable draft.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setD({
       title: s.title, description: s.description, kind: s.kind, city_slug: s.city.slug, area: s.area, lat: s.lat, lng: s.lng,
       bedrooms: s.bedrooms, bathrooms: s.bathrooms, max_guests: s.max_guests, floor_sqm: s.floor_sqm,
@@ -97,7 +99,7 @@ export default function StayEditor() {
   };
 
   if (id && existing.data === null && !existing.loading) {
-    return <Page><Notice tone="error">This stay doesn't exist or isn't yours.</Notice></Page>;
+    return <Page><Notice tone="error">This stay doesn’t exist or isn’t yours.</Notice></Page>;
   }
   if (existing.data && me && existing.data.host_id !== me) {
     return <Page><Notice tone="error">Only the host can edit this stay.</Notice></Page>;

@@ -102,7 +102,9 @@ export function parsePage(html: string, city: string, offer: Offer): ParsedPage 
   $('article.listing-snippet').each((_, el) => {
     const card = $(el);
     const id = card.attr('data-uuid') ?? '';
-    const skip = (reason: string) => skipped.push({ id, reason });
+    const skip = (reason: string): void => {
+      skipped.push({ id, reason });
+    };
     if (!id) return skip('no id');
 
     const titleEl = card.find('div[title].text-2xl').first();
@@ -117,6 +119,10 @@ export function parsePage(html: string, city: string, offer: Offer): ParsedPage 
     const cardOffer: Offer = perMonth ? 'rent' : 'sale';
     // "for Sale or Rent" cards show the rent on rent pages and the price on sale pages.
     if (cardOffer !== offer) return skip(`price is for ${cardOffer}`);
+    // Agents sometimes type a sale price as monthly rent (₱9.6M/month). Same bounds as the database's check.
+    if (offer === 'rent' ? price < 1000 || price > 5_000_000 : price < 200_000 || price > 2_000_000_000) {
+      return skip('implausible price');
+    }
 
     const facts: Record<string, string> = {};
     card.find('ul li').each((__, li) => {

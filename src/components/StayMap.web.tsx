@@ -52,11 +52,11 @@ function Clicks({ onPick }: { onPick?: (lat: number, lng: number) => void }) {
 }
 
 export function StayMap({ stays = [], selectedId, onSelect, center, zoom = 13, onBounds, height = 420, pinAt, onPick, fit = true }: StayMapProps) {
+  // Refit only when the set of stays (or the pin) changes, not on hover.
+  const points = fit && stays.length ? stays.map((s) => `${s.lat},${s.lng}`).join(';') : pinAt ? `${pinAt.lat},${pinAt.lng}` : '';
   const fitTo = useMemo<[number, number][] | undefined>(
-    () => (fit && stays.length ? stays.map((s) => [s.lat, s.lng]) : pinAt ? [[pinAt.lat, pinAt.lng]] : undefined),
-    // Refit only when the set of stays changes, not on hover.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fit, stays.map((s) => s.id).join(','), pinAt?.lat, pinAt?.lng],
+    () => (points ? points.split(';').map((p) => p.split(',').map(Number) as [number, number]) : undefined),
+    [points],
   );
   const start: [number, number] = center ? [center.lat, center.lng] : pinAt ? [pinAt.lat, pinAt.lng] : [14.5547, 121.0244];
   return (

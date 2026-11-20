@@ -42,9 +42,9 @@ comment on table public.market_listings is
 
 create index market_listings_stats_idx on public.market_listings (city_id, offer, kind, bedrooms)
   where active and dupe_of is null;
--- Trigram index on the folded title + building, for duplicate detection.
+-- Trigram index on the folded building name (title when there's none), for duplicate detection.
 create index market_listings_trgm_idx on public.market_listings
-  using gin ((public.fold(coalesce(building, '') || ' ' || title)) extensions.gin_trgm_ops);
+  using gin ((public.fold(coalesce(building, title))) extensions.gin_trgm_ops);
 create index market_listings_last_seen_idx on public.market_listings (last_seen);
 
 alter table public.market_listings enable row level security;
@@ -181,7 +181,9 @@ end $$;
 
 /**
  * Groups reposts of the same unit: same city, offer, kind and bedrooms, floor area
- * within 2 sqm, price within 3%, and similar building + title text. Each copy
+ * within 2 sqm, price within 3%, and a similar building name. Titles alone
+ * aren't compared when there's a building: they share so much boilerplate
+ * ("1 Bedroom Condo for rent in …, Metro Manila") that different units look alike. Each copy
  * points at the oldest listing in its group.
  */
 create or replace function public.dedupe_market_listings() returns int
@@ -200,7 +202,8 @@ begin
      and a.bedrooms is not distinct from b.bedrooms
      and abs(coalesce(a.floor_sqm, 0) - coalesce(b.floor_sqm, 0)) <= 2
      and abs(a.price_php - b.price_php) <= 0.03 * a.price_php
-     and fold(coalesce(a.building, '') || ' ' || a.title) % fold(coalesce(b.building, '') || ' ' || b.title)
+     and (a.building is null) = (b.building is null)
+     and fold(coalesce(a.building, a.title)) % fold(coalesce(b.building, b.title))
     where a.active and b.active and a.dupe_of is null
     group by b.id
   )
@@ -250,7 +253,7 @@ with months as (
          p.price_php
   from public.market_listings l
   join months m
-    on tstzrange(l.first_seen, l.last_seen, '[]')
+    on tstzrange(l.first_seen, greatest(l.last_seen, l.first_seen), '[]')
        && tstzrange(m.month::timestamptz, (m.month + interval '1 month')::timestamptz)
   cross join lateral (
     select h.price_php from public.market_price_history h

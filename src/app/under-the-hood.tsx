@@ -61,12 +61,14 @@ create policy "guests review stays they completed" on reviews for insert
 ) stored
 
 where s.search @@ websearch_to_tsquery('simple', fold(:q))
-   or fold(:q) <% fold(s.title || ' ' || s.area || ' ' || c.name)
+   or not exists (            -- every word close to some word
+        select 1 from regexp_split_to_table(fold(:q), '\\s+') w
+        where not (w <% fold(s.title || ' ' || s.area || ' ' || c.name)))
 order by ts_rank_cd(s.search, tsq)
        + word_similarity(fold(:q), fold(s.title || ' ' || s.area)) desc`,
     demo: {
-      label: 'Search "bonifacio glbal pool"',
-      run: async () => (await searchStays({ q: 'bonifacio glbal pool', limit: 5 })).map((s) => `${s.title} · ${s.city_name} (score ${s.score.toFixed(2)})`),
+      label: 'Search "makatii pool"',
+      run: async () => (await searchStays({ q: 'makatii pool', limit: 5 })).map((s) => `${s.title} · ${s.city_name} (score ${s.score.toFixed(2)})`),
     },
   },
   {

@@ -16,7 +16,7 @@ export function StayCard({ stay, query, highlighted, onHover, compact }: {
       onHoverIn={() => onHover?.(stay.id)}
       onHoverOut={() => onHover?.(null)}
       style={({ pressed }) => [s.card, compact && s.compact, highlighted && s.highlighted, pressed && { opacity: 0.85 }]}
-      accessibilityRole="link"
+     
       accessibilityLabel={`${stay.title}, ${php(stay.nightly_php)} a night`}
     >
       <StayArt seed={stay.art_seed} kind={stay.kind} photo={stay.photo} style={compact ? { width: 120 } : undefined} />

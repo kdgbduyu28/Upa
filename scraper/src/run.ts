@@ -23,7 +23,7 @@ export type RunResult = {
   sample: Listing[];
 };
 
-const FALLBACK_CITIES = [
+const FALLBACK_CITIES: { slug: string; dotproperty_path: string | null }[] = [
   { slug: 'makati', dotproperty_path: 'metro-manila/makati' },
   { slug: 'taguig', dotproperty_path: 'metro-manila/taguig' },
 ];

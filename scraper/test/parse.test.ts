@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { pageUrl, plan } from '../src/crawl';
+import { pageUrl, pagesToVisit, plan } from '../src/crawl';
 import { Blocked, createFetcher } from '../src/fetch';
 import { furnishingOf, parseArea, parsePage, parsePrice, splitPlace } from '../src/parse';
 import { isAllowed, parseRobots } from '../src/robots';
@@ -91,8 +91,22 @@ describe('crawl plan', () => {
   it('covers rent and sale searches for crawled cities only', () => {
     const t = plan([{ slug: 'makati', dotproperty_path: 'metro-manila/makati' }, { slug: 'boracay', dotproperty_path: null }]);
     expect(t).toHaveLength(6);
-    expect(pageUrl(t[0], 1)).toBe('https://www.dotproperty.com.ph/condos-for-rent/metro-manila/makati');
-    expect(pageUrl(t[0], 3)).toBe('https://www.dotproperty.com.ph/condos-for-rent/metro-manila/makati?page=3');
+    expect(pageUrl(t[0], 1)).toBe('https://www.dotproperty.com.ph/condos-for-rent/metro-manila/makati?sort=newest');
+    expect(pageUrl(t[0], 3)).toBe('https://www.dotproperty.com.ph/condos-for-rent/metro-manila/makati?sort=newest&page=3');
+  });
+
+  it('reads the two newest pages daily and rotates deeper ones', () => {
+    expect(pagesToVisit(5764, 0, 4)).toEqual([1, 2, 3, 4]);
+    expect(pagesToVisit(5764, 1, 4)).toEqual([1, 2, 5, 6]);
+    expect(pagesToVisit(5764, 8, 4)).toEqual([1, 2, 19, 20]);
+    expect(pagesToVisit(5764, 9, 4)).toEqual([1, 2, 3, 4]);
+    // Small markets: only the pages that exist.
+    expect(pagesToVisit(9, 5, 4)).toEqual([1]);
+    expect(pagesToVisit(60, 5, 4)).toEqual([1, 2, 3]);
+    // Every page 1..20 is visited within nine days.
+    const seen = new Set<number>();
+    for (let d = 0; d < 9; d++) pagesToVisit(5764, d, 4).forEach((p) => seen.add(p));
+    expect(seen.size).toBe(20);
   });
 });
 

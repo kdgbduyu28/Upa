@@ -3,9 +3,16 @@
 -- 564 bookings and 309 reviews. Every name is made up.
 --
 -- Runs on a Supabase database (it writes auth.users and auth.identities).
--- Safe to re-run: it deletes the demo accounts (and so all their content) first.
+-- Defines public.reset_demo(), which deletes the demo accounts (and with them all
+-- their stays, bookings and reviews) and recreates everything. pg_cron runs it
+-- nightly so visitors' changes to the shared demo accounts don't pile up.
+-- Applying this file also runs it once.
 
-begin;
+create or replace function public.reset_demo() returns void
+language plpgsql security definer
+set search_path = public, extensions
+as $reset$
+begin
 
 delete from auth.users where email like '%@upa.test';
 
@@ -166,31 +173,31 @@ insert into auth.identities (id, user_id, provider_id, provider, identity_data, 
 values (gen_random_uuid(), '00000000-0000-4000-8000-000000000111', '00000000-0000-4000-8000-000000000111', 'email', '{"sub":"00000000-0000-4000-8000-000000000111","email":"guest12@upa.test","email_verified":true}', now(), now(), now());
 
 -- Profiles were made by the on_auth_user_created trigger; mark the hosts.
-update public.profiles p set is_host = v.host, bio = v.bio
+update public.profiles p set is_host = v.host, bio = v.bio, created_at = now() - make_interval(days => v.days)
 from (values
-  ('00000000-0000-4000-8000-000000000001'::uuid, true, 'The demo host account. Try confirming a booking request.'),
-  ('00000000-0000-4000-8000-000000000002'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000010'::uuid, true, 'Makati and BGC condos, managed by me and my sister. Fast replies!'),
-  ('00000000-0000-4000-8000-000000000011'::uuid, true, 'Retired engineer. I keep three family houses up north tidy for guests.'),
-  ('00000000-0000-4000-8000-000000000012'::uuid, true, 'Architect. Every unit I host is one I designed the interior for.'),
-  ('00000000-0000-4000-8000-000000000013'::uuid, true, 'Surfer and host in Siargao. Ask me about the best breaks.'),
-  ('00000000-0000-4000-8000-000000000014'::uuid, true, 'Cebu-based. Business travellers welcome: fast Wi-Fi, desk, quiet.'),
-  ('00000000-0000-4000-8000-000000000015'::uuid, true, 'Beach villas in Boracay and El Nido. Island hopping tips included.'),
-  ('00000000-0000-4000-8000-000000000016'::uuid, true, 'Baguio and Tagaytay cabins. Fireplace season is the best season.'),
-  ('00000000-0000-4000-8000-000000000017'::uuid, true, 'Davao, CDO and Iloilo apartments for long stays.'),
-  ('00000000-0000-4000-8000-000000000100'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000101'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000102'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000103'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000104'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000105'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000106'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000107'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000108'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000109'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000110'::uuid, false, ''),
-  ('00000000-0000-4000-8000-000000000111'::uuid, false, '')
-) as v(id, host, bio)
+  ('00000000-0000-4000-8000-000000000001'::uuid, true, 'The demo host account. Try confirming a booking request.', 300),
+  ('00000000-0000-4000-8000-000000000002'::uuid, false, '', 83),
+  ('00000000-0000-4000-8000-000000000010'::uuid, true, 'Makati and BGC condos, managed by me and my sister. Fast replies!', 494),
+  ('00000000-0000-4000-8000-000000000011'::uuid, true, 'Retired engineer. I keep three family houses up north tidy for guests.', 591),
+  ('00000000-0000-4000-8000-000000000012'::uuid, true, 'Architect. Every unit I host is one I designed the interior for.', 688),
+  ('00000000-0000-4000-8000-000000000013'::uuid, true, 'Surfer and host in Siargao. Ask me about the best breaks.', 785),
+  ('00000000-0000-4000-8000-000000000014'::uuid, true, 'Cebu-based. Business travellers welcome: fast Wi-Fi, desk, quiet.', 882),
+  ('00000000-0000-4000-8000-000000000015'::uuid, true, 'Beach villas in Boracay and El Nido. Island hopping tips included.', 979),
+  ('00000000-0000-4000-8000-000000000016'::uuid, true, 'Baguio and Tagaytay cabins. Fireplace season is the best season.', 376),
+  ('00000000-0000-4000-8000-000000000017'::uuid, true, 'Davao, CDO and Iloilo apartments for long stays.', 473),
+  ('00000000-0000-4000-8000-000000000100'::uuid, false, '', 260),
+  ('00000000-0000-4000-8000-000000000101'::uuid, false, '', 313),
+  ('00000000-0000-4000-8000-000000000102'::uuid, false, '', 66),
+  ('00000000-0000-4000-8000-000000000103'::uuid, false, '', 119),
+  ('00000000-0000-4000-8000-000000000104'::uuid, false, '', 172),
+  ('00000000-0000-4000-8000-000000000105'::uuid, false, '', 225),
+  ('00000000-0000-4000-8000-000000000106'::uuid, false, '', 278),
+  ('00000000-0000-4000-8000-000000000107'::uuid, false, '', 31),
+  ('00000000-0000-4000-8000-000000000108'::uuid, false, '', 84),
+  ('00000000-0000-4000-8000-000000000109'::uuid, false, '', 137),
+  ('00000000-0000-4000-8000-000000000110'::uuid, false, '', 190),
+  ('00000000-0000-4000-8000-000000000111'::uuid, false, '', 243)
+) as v(id, host, bio, days)
 where p.id = v.id;
 
 -- Stays
@@ -352,7 +359,7 @@ from (values
   (148, '00000000-0000-4000-8000-000000000015', 'Seaside 2BR condo sunset view', 'Wake up to the sound of the waves. Outdoor shower, hammocks and a shaded veranda for long lazy afternoons. Perfect base for island hopping and surfing. We can arrange boats, scooters and airport transfers.', 'condo', 'el-nido', 'Corong-Corong', 11.187116, 119.404618, 2, 2, 6, 81, 4950, null::numeric, 600, 2, true, '["wifi","aircon","beach-access","pool"]', 820318)
 ) as v(id, host, title, description, kind, slug, area, lat, lng, bedrooms, bathrooms, max_guests, sqm, nightly, monthly, cleaning, min_nights, instant, amenities, art)
 join public.cities c on c.slug = v.slug;
-select setval(pg_get_serial_sequence('public.stays', 'id'), (select max(id) from public.stays));
+perform setval(pg_get_serial_sequence('public.stays', 'id'), (select max(id) from public.stays));
 
 -- Seasonal rates
 insert into public.stay_rates (stay_id, during, nightly_php, label) values
@@ -1105,7 +1112,7 @@ overriding system value values
   (563, 25, '00000000-0000-4000-8000-000000000002', 'booking', daterange(current_date + 14, current_date + 17), 2, 'confirmed', 25778, now() + interval '-20 days'),
   (564, 51, '00000000-0000-4000-8000-000000000002', 'booking', daterange(current_date + 30, current_date + 34), 2, 'pending', 11260, now() + interval '-20 days'),
   (565, 1, '00000000-0000-4000-8000-000000000103', 'booking', daterange(current_date + 8, current_date + 12), 2, 'pending', 6390, now() + interval '-20 days');
-select setval(pg_get_serial_sequence('public.bookings', 'id'), (select max(id) from public.bookings));
+perform setval(pg_get_serial_sequence('public.bookings', 'id'), (select max(id) from public.bookings));
 
 -- Reviews
 insert into public.reviews (booking_id, stay_id, author_id, rating, body, created_at) values
@@ -1419,4 +1426,17 @@ insert into public.reviews (booking_id, stay_id, author_id, rating, body, create
   (557, 148, '00000000-0000-4000-8000-000000000110', 4, 'Comfortable and clean. Check-in instructions could be clearer.', now() - interval '104 days'),
   (559, 148, '00000000-0000-4000-8000-000000000104', 4, 'Comfortable and clean. Check-in instructions could be clearer.', now() - interval '64 days');
 
-commit;
+end
+$reset$;
+
+revoke execute on function public.reset_demo() from public, anon, authenticated;
+
+-- 03:00 Manila (19:00 UTC), when hardly anyone is browsing.
+do $$
+begin
+  if exists (select 1 from pg_extension where extname = 'pg_cron') then
+    perform cron.schedule('upa-reset-demo', '0 19 * * *', 'select public.reset_demo()');
+  end if;
+end $$;
+
+select public.reset_demo();

@@ -17,9 +17,10 @@ export default function About() {
       <Section title="Rent and sale prices">
         <Card style={{ gap: 8 }}>
           <T>
-            Once a day a small program reads the first four pages of each search on Dot Property (condos, houses, apartments
-            and townhouses, for rent and for sale, in 15 cities). It makes one request every three seconds, identifies
-            itself, follows the site’s robots.txt and stops the moment the site refuses it.
+            Once a day a small program reads four pages of each search on Dot Property (condos, houses, apartments
+            and townhouses, for rent and for sale, in 14 cities): the two newest pages, plus two older pages that
+            rotate day by day. It makes one request every three seconds, identifies itself, follows the site’s
+            robots.txt and stops the moment the site refuses it.
           </T>
           <T>
             Only the facts needed for statistics are kept: type, city, area, bedrooms, bathrooms, floor area and asking price.

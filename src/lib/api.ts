@@ -170,6 +170,11 @@ export const marketCompare = (offer: Offer, kind: MarketKind, beds: number) =>
 export const rentCheck = async (city: string, kind: MarketKind, beds: number, sqm: number | null, price: number) =>
   one(await rpc<RentCheck[]>('rent_check', { p_city: city, p_kind: kind, p_beds: beds, p_sqm: sqm, p_price: price }));
 
+export type AreaRow = { area: string; n: number; median: number; median_per_sqm: number | null; vs_city_pct: number | null };
+
+export const marketAreas = (city: string, offer: Offer, kind: MarketKind, beds: number) =>
+  rpc<AreaRow[]>('market_areas', { p_city: city, p_offer: offer, p_kind: kind, p_beds: beds });
+
 export const grossYield = async (city: string, kind: MarketKind, beds: number) =>
   one(await rpc<Yield[]>('gross_yield', { p_city: city, p_kind: kind, p_beds: beds }));
 

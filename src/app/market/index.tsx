@@ -4,7 +4,7 @@ import { Linking, View } from 'react-native';
 import { Bars, BandChart } from '../../components/Chart';
 import { Button, Card, Chip, Notice, Page, Pill, Row, Section, Segmented, Stat, Status, T } from '../../components/ui';
 import {
-  grossYield, lastScrape, marketCities, marketCompare, marketSnapshot, marketTrend, priceIndex, stayVsLease,
+  grossYield, lastScrape, marketAreas, marketCities, marketCompare, marketSnapshot, marketTrend, priceIndex, stayVsLease,
   type MarketKind, type Offer,
 } from '../../lib/api';
 import { ago, fmtMonth, pct, php, phpShort } from '../../lib/format';
@@ -33,6 +33,7 @@ export default function Market() {
   const snap = useAsync(() => marketSnapshot(city, offer, kind, beds), [city, offer, kind, beds]);
   const trend = useAsync(() => marketTrend(city, offer, kind, beds, 12), [city, offer, kind, beds]);
   const compare = useAsync(() => marketCompare(offer, kind, beds), [offer, kind, beds]);
+  const areas = useAsync(() => marketAreas(city, offer, kind, beds), [city, offer, kind, beds]);
   const yld = useAsync(() => grossYield(city, kind, beds), [city, kind, beds]);
   const svl = useAsync(() => stayVsLease(city), [city]);
   const bsp = useAsync(priceIndex, []);
@@ -117,6 +118,19 @@ export default function Market() {
             ) : null}
           </Section>
 
+          <Section title={`Neighbourhoods in ${cityName}`} sub={`Median ${offer === 'rent' ? 'monthly rent' : 'price'} of active listings, areas with at least 5`}>
+            <Status loading={areas.loading} error={areas.error} empty={!areas.loading && !areas.data?.length}
+              emptyText="Not enough listings per neighbourhood yet for this combination." />
+            {areas.data?.length ? (
+              <Card>
+                <Bars rows={areas.data.slice(0, 12).map((r) => ({
+                  key: r.area, label: r.area, value: Number(r.median),
+                  sub: `${r.n} · ${r.vs_city_pct != null ? `${r.vs_city_pct > 0 ? '+' : ''}${Math.round(Number(r.vs_city_pct))}%` : ''}`,
+                }))} />
+              </Card>
+            ) : null}
+          </Section>
+
           <Section title="Compared with other cities" sub={`Median ${offer === 'rent' ? 'monthly rent' : 'price'}, latest month, at least 5 listings`}>
             <Status loading={compare.loading} error={compare.error} empty={!compare.loading && !compare.data?.length} />
             {compare.data?.length ? (
@@ -178,8 +192,8 @@ export default function Market() {
 
       <View style={{ marginTop: 24 }}>
         <Notice tone="info" title="About these numbers">
-          These are asking prices, not what people end up paying. A sample of up to 100 listings per search is read each day,
-          so very large markets are estimated from the newest listings.
+          These are asking prices, not what people end up paying. Each day the newest listings are read along with a
+          rotating set of older pages, so large markets are estimated from a sample of their most recent 500 listings.
         </Notice>
       </View>
       <Row style={{ marginTop: 12 }}>

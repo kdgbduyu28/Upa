@@ -1,1 +1,12 @@
 city,month,active_listings,occupancy,adr_php,annual_revenue_php,source_url
+manila,2026-10-01,28824,0.52,2398,429078,https://www.airdna.co/vacation-rental-data/app/ph/default/manila/overview
+cebu-city,2026-10-01,4466,0.57,2082,416458,https://www.airdna.co/vacation-rental-data/app/ph/cebu/cebu-city/overview
+baguio,2026-10-01,3562,0.44,3470,511107,https://www.airdna.co/vacation-rental-data/app/ph/benguet/baguio/overview
+davao-city,2026-10-01,3107,0.50,2145,378598,https://www.airdna.co/vacation-rental-data/app/ph/davao-city/davao-city/overview
+tagaytay,2026-10-01,2341,0.34,3849,454317,https://www.airdna.co/vacation-rental-data/app/ph/cavite/tagaytay/overview
+lapu-lapu,2026-10-01,2196,0.54,2461,460627,https://www.airdna.co/vacation-rental-data/app/ph/cebu/mactan/overview
+iloilo-city,2026-10-01,1564,0.51,2019,353358,https://www.airdna.co/vacation-rental-data/app/ph/iloilo/iloilo-city/overview
+siargao,2026-10-01,1359,0.62,3975,858155,https://www.airdna.co/vacation-rental-data/app/ph/surigao-del-norte/general-luna/overview
+cagayan-de-oro,2026-10-01,1263,0.48,2145,359668,https://www.airdna.co/vacation-rental-data/app/ph/misamis-oriental/cagayan-de-oro/overview
+boracay,2026-10-01,680,0.53,4669,832915,https://www.airdna.co/vacation-rental-data/app/ph/aklan/malay/overview
+el-nido,2026-10-01,514,0.55,6436,1116864,https://www.airdna.co/vacation-rental-data/app/ph/palawan/el-nido/overview

@@ -11,7 +11,7 @@ beforeEach(async () => {
 });
 
 type Row = Partial<{
-  source_id: string; offer: string; kind: string; city: string; title: string; building: string;
+  source_id: string; offer: string; kind: string; city: string; area: string; title: string; building: string;
   bedrooms: number; floor_sqm: number; price_php: number;
 }>;
 
@@ -111,6 +111,17 @@ describe('stats', () => {
     expect(r.comparables).toBe(10);
     expect(r.percentile).toBe(20);
     expect(r.verdict).toBe('Cheaper than most');
+  });
+
+  it('breaks medians down by neighbourhood, leaving out thin areas', async () => {
+    await ingest([
+      row(40, { area: 'Rockwell', price_php: 80000 }), row(41, { area: 'Rockwell', price_php: 90000 }),
+      row(42, { area: 'Rockwell', price_php: 85000 }), row(43, { area: 'Poblacion', price_php: 20000 }),
+    ]);
+    const r = await asUser<{ area: string; n: number; median: string }>(db, null,
+      `select * from market_areas('makati', 'rent', 'condo', 1, 3)`);
+    // The ten from beforeEach are all in Salcedo Village; Poblacion has one listing, so it's left out.
+    expect(r.map((x) => [x.area, x.n, Number(x.median)])).toEqual([['Rockwell', 3, 85000], ['Salcedo Village', 10, 35500]]);
   });
 
   it('says when there is not enough data', async () => {

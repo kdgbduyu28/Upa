@@ -1,1 +1,10 @@
 quarter,segment,area,value,yoy,source_url
+2026-04-01,all,PH,156.9,0.4,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf
+2026-04-01,all,NCR,157.3,5.2,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf
+2026-04-01,all,AONCR,158.5,-2.7,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf
+2026-04-01,condo,PH,154.1,6.0,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf
+2026-04-01,condo,NCR,155.0,7.4,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf
+2026-04-01,condo,AONCR,154.6,3.4,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf
+2026-04-01,house,PH,160.7,-4.1,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf
+2026-04-01,house,NCR,165.6,-3.1,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf
+2026-04-01,house,AONCR,158.7,-4.5,https://www.bsp.gov.ph/Media_And_Research/RPPI/RPPI-Report-2026-Q2.pdf

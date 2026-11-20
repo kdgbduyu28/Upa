@@ -1,7 +1,7 @@
 // One scrape run: robots.txt check, then every planned search a few pages deep,
 // each page ingested as soon as it's parsed so a crash keeps what it got.
 import type { Sql } from 'postgres';
-import { BASE, DEFAULT_POLITENESS, PER_PAGE, pageUrl, plan, type Politeness, type Target } from './crawl';
+import { BASE, DEFAULT_POLITENESS, dayNumber, pageUrl, pagesToVisit, plan, type Politeness, type Target } from './crawl';
 import { Blocked, createFetcher } from './fetch';
 import { parsePage, type Listing } from './parse';
 import { isAllowed, parseRobots } from './robots';
@@ -33,6 +33,7 @@ export async function scrape(o: RunOptions): Promise<RunResult> {
   const p: Politeness = { ...DEFAULT_POLITENESS, ...o.politeness };
   const log = o.log ?? console.log;
   const http = createFetcher(p, o.fetchImpl);
+  const day = dayNumber();
   const result: RunResult = { status: 'ok', pages: 0, listings: 0, skipped: 0, errors: [], sample: [] };
 
   const rules = parseRobots(await http.get(`${BASE}/robots.txt`).catch(() => ''));
@@ -64,7 +65,10 @@ export async function scrape(o: RunOptions): Promise<RunResult> {
 
   /** Returns true when the whole run must stop (blocked or out of budget). */
   async function crawlTarget(t: Target): Promise<boolean> {
-    for (let page = 1; page <= p.maxPages; page++) {
+    // Page 1 always comes first; its result count decides which other pages to read.
+    let queue = [1];
+    for (let qi = 0; qi < queue.length; qi++) {
+      const page = queue[qi];
       const url = pageUrl(t, page);
       const u = new URL(url);
       if (!isAllowed(rules, u.pathname + u.search)) {
@@ -103,8 +107,8 @@ export async function scrape(o: RunOptions): Promise<RunResult> {
         log(`${url}: ${parsed.listings.length} parsed, ${parsed.skipped.length} skipped (total ${parsed.total ?? '?'})`);
       }
 
-      const total = parsed.total ?? 0;
-      if (parsed.listings.length + parsed.skipped.length === 0 || page * PER_PAGE >= total) break;
+      if (parsed.listings.length + parsed.skipped.length === 0) break;
+      if (page === 1) queue = pagesToVisit(parsed.total, day, p.maxPages);
     }
     return false;
   }
